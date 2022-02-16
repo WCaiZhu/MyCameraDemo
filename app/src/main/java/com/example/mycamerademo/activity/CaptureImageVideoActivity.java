@@ -38,11 +38,11 @@ public class CaptureImageVideoActivity extends Activity {
     private String firstF = "";//首帧图
     private String videoUrl = "";//视频路径
     private String imageUrl = "";//拍路径
-    private boolean isPhoto = false;//是否是照片
+    private boolean isPhoto = false;//是否是拍照
     private int[] videoSize = new int[2];//视频尺寸
-    private PowerManager.WakeLock mWakeLock;
+    private PowerManager.WakeLock mWakeLock;//来保证程序运行时保持手机屏幕的恒亮
     /**
-     * 按钮类型
+     * 按钮类型（设置只能录像或只能拍照或两种都可以（默认两种都可以））
      */
     private int mButtonState;
 
@@ -59,7 +59,7 @@ public class CaptureImageVideoActivity extends Activity {
 
         mButtonState = getIntent().getIntExtra(EXTRA_BUTTON_STATE, JCameraView.BUTTON_STATE_ONLY_CAPTURE);
         jCameraView = findViewById(R.id.jCameraView);
-        //设置视频保存路径，默认路径Environment.getExternalStorageDirectory().getPath()
+        //设置视频保存路径
         jCameraView.setSaveVideoPath(Constant.VIDEO_PATH);
         //设置只能录像或只能拍照或两种都可以（默认两种都可以）
         jCameraView.setFeatures(mButtonState);
@@ -77,7 +77,7 @@ public class CaptureImageVideoActivity extends Activity {
             case JCameraView.BUTTON_STATE_ONLY_RECORDER:
                 return "长按录像";
             case JCameraView.BUTTON_STATE_BOTH:
-                return "轻触拍照，长按摄像";
+                return "轻触拍照，长按录像";
         }
         return "轻触拍照";
     }
@@ -145,9 +145,11 @@ public class CaptureImageVideoActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        //不是锁屏状态或者不在拍摄和预览状态时，重置
         if (jCameraView.getScreenCnt() == 0 || !jCameraView.isCapEndPreview()) {
             jCameraView.onResume();
         } else if (jCameraView.getScreenCnt() > 0) {
+            //如果是锁屏状态 则进行解锁
             jCameraView.onScreenOn();
         }
         if (mWakeLock == null) {
@@ -162,12 +164,15 @@ public class CaptureImageVideoActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if (jCameraView.isRecording()) {
+            //正在录制，手动锁屏
             jCameraView.onRecordingScreenOff();
         } else if (jCameraView.isCapEndPreview()) {
+            //拍摄结束，处于预览界面
             jCameraView.onCaptureScreenOff();
         } else {
             jCameraView.onPause();
         }
+        //释放锁
         if (mWakeLock != null) {
             mWakeLock.release();
             mWakeLock = null;

@@ -8,12 +8,31 @@ import com.cz.jcamera.CameraInterface;
 
 public interface State {
 
+    /**
+     * 开始
+     * @param holder
+     * @param screenProp
+     */
     void start(SurfaceHolder holder, float screenProp);
 
+    /**
+     * 停止
+     */
     void stop();
 
+    /**
+     * 聚焦
+     * @param x
+     * @param y
+     * @param callback
+     */
     void foucs(float x, float y, CameraInterface.FocusCallback callback);
 
+    /**
+     * 切换摄像头
+     * @param holder
+     * @param screenProp
+     */
     void swtich(SurfaceHolder holder, float screenProp);
 
     void restart();

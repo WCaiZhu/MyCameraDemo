@@ -259,6 +259,9 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
         }
     }
 
+    /**
+     * 打开相机后的回调
+     */
     @Override
     public void cameraHasOpened() {
         CameraInterface.getInstance().doStartPreview(mVideoView.getHolder(), screenProp);

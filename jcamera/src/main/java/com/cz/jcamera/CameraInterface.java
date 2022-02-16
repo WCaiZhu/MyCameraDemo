@@ -39,6 +39,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ */
 @SuppressWarnings("deprecation")
 public class CameraInterface implements Camera.PreviewCallback {
 
@@ -57,8 +60,8 @@ public class CameraInterface implements Camera.PreviewCallback {
     private boolean isPreviewing = false;
 
     private int SELECTED_CAMERA = -1;
-    private int CAMERA_POST_POSITION = -1;
-    private int CAMERA_FRONT_POSITION = -1;
+    private int CAMERA_POST_POSITION = -1;//后置
+    private int CAMERA_FRONT_POSITION = -1;//前置
 
     private SurfaceHolder mHolder = null;
     private float screenProp = -1.0f;
@@ -80,6 +83,7 @@ public class CameraInterface implements Camera.PreviewCallback {
     private int angle = 0;
     private int cameraAngle = 90;//摄像头角度   默认为90度
     private int rotation = 0;
+    //第一帧数据
     private byte[] firstFrame_data;
 
     public static final int TYPE_RECORDER = 0x090;
@@ -91,7 +95,7 @@ public class CameraInterface implements Camera.PreviewCallback {
     private int mediaQuality = JCameraView.MEDIA_QUALITY_MIDDLE;
     private SensorManager sm = null;
 
-    private int[] videoMeasure = new int[]{0,0};//视频尺寸
+    private int[] videoMeasure = new int[]{0, 0};//视频尺寸
 
     //获取CameraInterface单例
     public static synchronized CameraInterface getInstance() {
@@ -111,6 +115,9 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * 通过加速度传感器，判断手机角度进行旋转
+     */
     private SensorEventListener sensorEventListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
             if (Sensor.TYPE_ACCELEROMETER != event.sensor.getType()) {
@@ -188,6 +195,11 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * 设置视频保存路径
+     *
+     * @param saveVideoPath
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     void setSaveVideoPath(String saveVideoPath) {
         this.saveVideoPath = saveVideoPath;
@@ -198,6 +210,12 @@ public class CameraInterface implements Camera.PreviewCallback {
     }
 
 
+    /**
+     * 设置镜头缩放（录制视频时，手指可上下缩放、拍照状态可进行两个手指缩放）
+     *
+     * @param zoom
+     * @param type
+     */
     public void setZoom(float zoom, int type) {
         if (mCamera == null) {
             return;
@@ -205,6 +223,8 @@ public class CameraInterface implements Camera.PreviewCallback {
         if (mParams == null) {
             mParams = mCamera.getParameters();
         }
+        //isZoomSupported()是判断设备是否支持缩放，isSmoothZoomSupported()是判断是否支持平滑缩放，
+        // android的部分机型只返回一个是：isZoomSupported()放回true
         /*if (!mParams.isZoomSupported() || !mParams.isSmoothZoomSupported()) {
             return;
         }*/
@@ -222,13 +242,13 @@ public class CameraInterface implements Camera.PreviewCallback {
                     int scaleRate = (int) (zoom / 40);
                     float getMaxZoom = mParams.getMaxZoom();
                     if (scaleRate <= getMaxZoom && scaleRate >= nowScaleRate && recordScleRate != scaleRate) {
-                        if(mParams.isSmoothZoomSupported()){
+                        if (mParams.isSmoothZoomSupported()) {
                             mCamera.startSmoothZoom(scaleRate);
-                        }else{
-                            if(scaleRate+10<=getMaxZoom){
-                                mParams.setZoom(scaleRate+10);
-                            }else{
-                                mParams.setZoom((int)getMaxZoom);
+                        } else {
+                            if (scaleRate + 10 <= getMaxZoom) {
+                                mParams.setZoom(scaleRate + 10);
+                            } else {
+                                mParams.setZoom((int) getMaxZoom);
                             }
 
                             mCamera.setParameters(mParams);
@@ -250,19 +270,24 @@ public class CameraInterface implements Camera.PreviewCallback {
                     } else if (nowScaleRate > mParams.getMaxZoom()) {
                         nowScaleRate = mParams.getMaxZoom();
                     }
-                    if(mParams.isSmoothZoomSupported()){
+                    if (mParams.isSmoothZoomSupported()) {
                         mCamera.startSmoothZoom(nowScaleRate);
-                    }else{
+                    } else {
                         mParams.setZoom(nowScaleRate);
                         mCamera.setParameters(mParams);
                     }
                 }
-                Log.i(TAG,"setZoom = " + nowScaleRate);
+                Log.i(TAG, "setZoom = " + nowScaleRate);
                 break;
         }
 
     }
 
+    /**
+     * 设置视频质量
+     *
+     * @param quality
+     */
     void setMediaQuality(int quality) {
         this.mediaQuality = quality;
     }
@@ -294,7 +319,7 @@ public class CameraInterface implements Camera.PreviewCallback {
 
 
     /**
-     * open Camera
+     * 打开Camera
      */
     void doOpenCamera(CameraOpenOverCallback callback) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -315,6 +340,11 @@ public class CameraInterface implements Camera.PreviewCallback {
         mCamera.setParameters(mParams);
     }
 
+    /**
+     * 打开相机
+     *
+     * @param id 前置/后置
+     */
     private synchronized void openCamera(int id) {
         try {
             this.mCamera = Camera.open(id);
@@ -325,7 +355,7 @@ public class CameraInterface implements Camera.PreviewCallback {
             }
         }
 
-        if (Build.VERSION.SDK_INT > 17 && this.mCamera != null) {
+        if (this.mCamera != null) {
             try {
                 this.mCamera.enableShutterSound(false);
             } catch (Exception e) {
@@ -342,9 +372,9 @@ public class CameraInterface implements Camera.PreviewCallback {
             SELECTED_CAMERA = CAMERA_POST_POSITION;
         }
         doDestroyCamera();
-        Log.i(TAG,"open start");
+        Log.i(TAG, "open start");
         openCamera(SELECTED_CAMERA);
-//        mCamera = Camera.open();
+        //        mCamera = Camera.open();
         if (this.mCamera != null) {
             try {
                 this.mCamera.enableShutterSound(false);
@@ -352,16 +382,16 @@ public class CameraInterface implements Camera.PreviewCallback {
                 e.printStackTrace();
             }
         }
-        Log.i(TAG,"open end");
+        Log.i(TAG, "open end");
         doStartPreview(holder, screenProp);
     }
 
     /**
-     * doStartPreview
+     * 启动预览窗口
      */
     public void doStartPreview(SurfaceHolder holder, float screenProp) {
         if (isPreviewing) {
-            Log.i(TAG,"doStartPreview isPreviewing");
+            Log.i(TAG, "doStartPreview isPreviewing");
         }
         if (this.screenProp < 0) {
             this.screenProp = screenProp;
@@ -443,7 +473,7 @@ public class CameraInterface implements Camera.PreviewCallback {
                 isPreviewing = false;
                 mCamera.release();
                 mCamera = null;
-//                destroyCameraInterface();
+                //                destroyCameraInterface();
                 Log.i(TAG, "=== Destroy Camera ===");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -470,7 +500,7 @@ public class CameraInterface implements Camera.PreviewCallback {
                 nowAngle = Math.abs(cameraAngle - angle);
                 break;
         }
-//
+        //
         Log.i("ID", angle + " = " + cameraAngle + " = " + nowAngle);
         mCamera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
@@ -666,6 +696,9 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * 获取镜头状态 前置/后置
+     */
     private void findAvailableCameras() {
         Camera.CameraInfo info = new Camera.CameraInfo();
         int cameraNum = Camera.getNumberOfCameras();
@@ -702,6 +735,7 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
         final String currentFocusMode = params.getFocusMode();
         try {
+            //自动对焦
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             mCamera.setParameters(params);
             mCamera.autoFocus(new Camera.AutoFocusCallback() {

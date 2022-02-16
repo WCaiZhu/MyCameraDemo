@@ -1,5 +1,8 @@
 package com.cz.jcamera.util;
 
+/**
+ * 屏幕倾斜角度
+ */
 public class AngleUtil {
     public static int getSensorAngle(float x, float y) {
         if (Math.abs(x) > Math.abs(y)) {

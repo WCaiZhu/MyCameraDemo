@@ -117,6 +117,12 @@ public class CameraParamUtil {
 
     }
 
+    /**
+     * 相机展示角度
+     * @param context
+     * @param cameraId 前置、后置
+     * @return
+     */
     public int getCameraDisplayOrientation(Context context, int cameraId) {
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);

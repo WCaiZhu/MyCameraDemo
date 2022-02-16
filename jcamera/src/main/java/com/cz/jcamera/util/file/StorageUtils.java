@@ -1,7 +1,6 @@
 package com.cz.jcamera.util.file;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
 
@@ -21,9 +20,6 @@ public class StorageUtils {
     public static long getStorageSize(String path) {
         try {
             StatFs fs = new StatFs(path);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
-                return fs.getAvailableBlocksLong() * fs.getBlockSizeLong();
-            }
             return fs.getAvailableBlocksLong() * fs.getBlockSizeLong();
         } catch (Exception e) {
             e.printStackTrace();
