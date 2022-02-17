@@ -132,7 +132,9 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
     };
 
-    //切换摄像头icon跟随手机角度进行旋转
+    /**
+     * 切换摄像头icon跟随手机角度进行旋转
+     */
     private void rotationAnimation() {
         if (mSwitchView == null) {
             return;
@@ -532,7 +534,12 @@ public class CameraInterface implements Camera.PreviewCallback {
         });
     }
 
-    //启动录像
+    /**
+     * 启动录像
+     * @param surface
+     * @param screenProp
+     * @param callback
+     */
     public void startRecord(Surface surface, float screenProp, ErrorCallback callback) {
         mCamera.setPreviewCallback(null);
         final int nowAngle = (angle + 90) % 360;
@@ -665,7 +672,11 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
     }
 
-    //停止录像
+    /**
+     * 停止录像
+     * @param isShort
+     * @param callback
+     */
     public void stopRecord(boolean isShort, StopRecordCallback callback) {
         Log.i(TAG, "stopRecord.....");
         if (!isRecorder) {
