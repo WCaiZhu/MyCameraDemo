@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.mycamerademo">
+
+
+    <!-- 往sdcard中写入数据的权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- 录音 -->
+    <!--允许程序录制声音通过手机或耳机的麦克-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<!--    &lt;!&ndash;允许一个应用程序捕获音频输出。不被第三方应用使用&ndash;&gt;-->
+<!--    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />-->
+    <!--允许程序修改声音设置信息-->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!--允许程序访问摄像头进行拍照-->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+     <!--允许程序在手机屏幕关闭后后台进程仍然运行-->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+<!--    &lt;!&ndash;允许当前应用改变配置，如定位&ndash;&gt;-->
+<!--    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />-->
+    <!--允许访问闪光灯-->
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <application
+        android:name=".App"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyCaneraDemo">
+        <activity
+            android:name=".activity.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 提供文件访问，android7.0之后访问文件目录需要 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.mycamerademo.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+        <!--5.0一下使用-->
+        <activity
+            android:name=".activity.CaptureImageVideoActivity"
+            android:hardwareAccelerated="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/NoTitleBarForVideo" />
+
+        <activity
+            android:name=".activity.PlayVideoActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/NoTitleBarForPlayVideo" />
+
+    </application>
+
+
+</manifest>
