@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.YuvImage;
@@ -19,7 +20,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.os.Build;
-import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -308,7 +309,6 @@ public class CameraInterface implements Camera.PreviewCallback {
         mCamera.setParameters(params);
     }
 
-
     public interface CameraOpenOverCallback {
         void cameraHasOpened();
     }
@@ -536,6 +536,7 @@ public class CameraInterface implements Camera.PreviewCallback {
 
     /**
      * 启动录像
+     *
      * @param surface
      * @param screenProp
      * @param callback
@@ -645,7 +646,7 @@ public class CameraInterface implements Camera.PreviewCallback {
 
         videoFileName = "video_" + System.currentTimeMillis() + ".mp4";
         if (saveVideoPath.equals("")) {
-            saveVideoPath = Environment.getExternalStorageDirectory().getPath();
+            return;
         }
         videoFileAbsPath = saveVideoPath + File.separator + videoFileName;
         mediaRecorder.setOutputFile(videoFileAbsPath);
@@ -674,6 +675,7 @@ public class CameraInterface implements Camera.PreviewCallback {
 
     /**
      * 停止录像
+     *
      * @param isShort
      * @param callback
      */
@@ -783,6 +785,27 @@ public class CameraInterface implements Camera.PreviewCallback {
         }
     }
 
+    /**
+     * 自动对焦
+     */
+    public void autoFocus() {
+        new Handler().postDelayed(() -> mCamera.autoFocus((success, camera) -> {
+            if (success) {
+                initCamera();
+            }
+        }), 500);
+    }
+
+    //相机参数的初始化设置
+    private void initCamera() {
+        Camera.Parameters params = mCamera.getParameters();
+        params.setPictureFormat(PixelFormat.JPEG);
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//1连续对焦
+        mCamera.setParameters(params);
+        mCamera.startPreview();
+        mCamera.cancelAutoFocus();// 2如果要实现连续的自动对焦，这一句必须加上
+
+    }
 
     /**
      * 计算点击位置的区域

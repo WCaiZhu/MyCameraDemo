@@ -317,6 +317,7 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        CameraInterface.getInstance().autoFocus();
     }
 
     @Override

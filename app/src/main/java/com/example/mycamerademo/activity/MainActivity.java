@@ -13,6 +13,8 @@ import com.bumptech.glide.Glide;
 import com.cz.jcamera.JCameraView;
 import com.cz.jcamera.util.file.FileUtil;
 import com.example.mycamerademo.R;
+import com.example.mycamerademo.bean.CaptureBean;
+import com.example.mycamerademo.util.CaptureModuleUtil;
 import com.lxj.xpermission.PermissionConstants;
 import com.lxj.xpermission.XPermission;
 
@@ -20,10 +22,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
-    /**
-     * 进行拍照录像
-     */
-    private static final int REQUEST_VIDEO = 1;
+
     /**
      * 进行播放
      */
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @param buttonState 按钮类型
      */
     @SuppressLint("WrongConstant")
@@ -104,9 +102,7 @@ public class MainActivity extends AppCompatActivity {
         XPermission.create(this, permissions).callback(new XPermission.SimpleCallback() {
             @Override
             public void onGranted() {
-                Intent intent = new Intent(MainActivity.this, CaptureImageVideoActivity.class);
-                intent.putExtra(CaptureImageVideoActivity.EXTRA_BUTTON_STATE, buttonState);
-                startActivityForResult(intent, REQUEST_VIDEO);
+                CaptureModuleUtil.startCaptureImageVideo(MainActivity.this, buttonState);
             }
 
             @Override
@@ -132,37 +128,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK)
-            return;
-
-        if (requestCode == REQUEST_VIDEO) {
-            if (data == null) {
-                return;
-            }
-            boolean isPhoto = data.getBooleanExtra("isPhoto", false);
-            if (!isPhoto) {
-                String videoPath = data.getStringExtra("videoPath");
-                long totalTime = data.getLongExtra("totalTime", 0);
-                int videoWidth = data.getIntExtra("videoWidth", 0);
-                int videoHeight = data.getIntExtra("videoHeight", 0);
-                if (FileUtil.isNotEmpty(videoPath)) {
-                    //TODO 获取视频
-                    Toast.makeText(this, "视频文件：" + videoPath, Toast.LENGTH_SHORT).show();
-
-                    setPic(videoPath);
-                    palyVideo(videoPath);
-                }
-            } else {
-                String imageUrl = data.getStringExtra("imageUrl");
-                String type = data.getStringExtra("type");
-                if (FileUtil.isNotEmpty(imageUrl)) {
+        if (CaptureModuleUtil.isCaptureVideoResult(requestCode, resultCode)) {
+            CaptureBean captureBean = CaptureModuleUtil.getCaptureVideoResultBean(data);
+            if (captureBean.isPhoto) {
+                if (FileUtil.isNotEmpty(captureBean.imageUrl)) {
                     //TODO 获取到图片
-                    Toast.makeText(this, "图片文件：" + imageUrl, Toast.LENGTH_SHORT).show();
-                    setPic(imageUrl);
+                    Toast.makeText(this, "图片文件：" + captureBean.imageUrl, Toast.LENGTH_SHORT).show();
+                    setPic(captureBean.imageUrl);
                     mIbPlay.setVisibility(View.GONE);
                 }
+                return;
             }
-        } else if (requestCode == REQUEST_PLAY_VIDEO) {
+            if (FileUtil.isNotEmpty(captureBean.videoPath)) {
+                //TODO 获取视频
+                Toast.makeText(this, "视频文件：" + captureBean.videoPath, Toast.LENGTH_SHORT).show();
+                mImgPic.setVisibility(View.VISIBLE);
+                mIbPlay.setVisibility(View.VISIBLE);
+                setPic(captureBean.videoPath);
+                palyVideo(captureBean.videoPath);
+            }
+
+        }
+
+        if (requestCode == REQUEST_PLAY_VIDEO) {
             mImgPic.setVisibility(View.GONE);
             mIbPlay.setVisibility(View.GONE);
         }

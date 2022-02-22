@@ -17,6 +17,7 @@ import com.cz.jcamera.listener.JCameraListener;
 import com.cz.jcamera.util.file.FileUtil;
 import com.example.mycamerademo.R;
 import com.example.mycamerademo.cnofig.Constant;
+import com.example.mycamerademo.util.CaptureModuleUtil;
 
 /**
  * 如果是聊天界面跳转到此界面，遵循下面两个要求
@@ -28,11 +29,6 @@ import com.example.mycamerademo.cnofig.Constant;
  * 拍完直接发送。
  */
 public class CaptureImageVideoActivity extends Activity {
-
-    /**
-     * 按钮类型
-     */
-    public static final String EXTRA_BUTTON_STATE = "extra_button_state";
 
     private JCameraView jCameraView;
     private String firstF = "";//首帧图
@@ -57,7 +53,7 @@ public class CaptureImageVideoActivity extends Activity {
     private void initView() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);  //设置全屏
 
-        mButtonState = getIntent().getIntExtra(EXTRA_BUTTON_STATE, JCameraView.BUTTON_STATE_ONLY_CAPTURE);
+        mButtonState = getIntent().getIntExtra(CaptureModuleUtil.EXTRA_BUTTON_STATE, JCameraView.BUTTON_STATE_ONLY_CAPTURE);
         jCameraView = findViewById(R.id.jCameraView);
         //设置视频保存路径
         jCameraView.setSaveVideoPath(Constant.VIDEO_PATH);
@@ -135,7 +131,7 @@ public class CaptureImageVideoActivity extends Activity {
                     intent.putExtra("videoHeight", videoSize[1]);
                     intent.putExtra("totalTime", jCameraView.recordTime / 1000);
                 }
-                setResult(RESULT_OK, intent);
+                setResult(CaptureModuleUtil.RESULTCODE_CAPTURE_VIDEO, intent);
                 finish();
             }
         });
